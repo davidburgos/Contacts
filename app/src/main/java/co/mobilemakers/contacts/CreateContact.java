@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 
@@ -28,6 +29,7 @@ public class CreateContact extends ActionBarActivity {
     private EditText mFirstName;
     private EditText mLastName;
     private EditText mNickName;
+    private TextView mTextView;
     private ImageView mImage;
 
     @Override
@@ -41,6 +43,7 @@ public class CreateContact extends ActionBarActivity {
         mFirstName = (EditText) findViewById(R.id.edit_text_firstname);
         mLastName  = (EditText) findViewById(R.id.edit_text_lastname);
         mNickName  = (EditText) findViewById(R.id.edit_text_nickname);
+        mTextView  = (TextView) findViewById(R.id.textViewImageMessage);
         mImage     = (ImageView)findViewById(R.id.imageButton);
         mImage.setDrawingCacheEnabled(true);
         mImage.setOnClickListener(new View.OnClickListener() {
@@ -59,17 +62,14 @@ public class CreateContact extends ActionBarActivity {
 
                 mainActivity.putExtra(FIRSTNAME,mFirstName.getText().toString());
                 mainActivity.putExtra(LASTNAME ,mLastName.getText().toString());
-                mainActivity.putExtra(NICKNAME ,mLastName.getText().toString());
+                mainActivity.putExtra(NICKNAME ,mNickName.getText().toString());
 
                  if(mImage.getDrawable() != null){
-
-                     mImage.buildDrawingCache();
-                    Bitmap bm = mImage.getDrawingCache();
-                     if(bm==null)
-                         bm=((BitmapDrawable)mImage.getDrawable()).getBitmap();
+                    mImage.buildDrawingCache();
+                    Bitmap bm=((BitmapDrawable)mImage.getDrawable()).getBitmap();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bm.compress(Bitmap.CompressFormat.PNG, 90, stream);
-                    mainActivity.putExtra(IMAGE    ,stream.toByteArray());
+                    mainActivity.putExtra(IMAGE ,stream.toByteArray());
                 }
 
                 setResult(Activity.RESULT_OK, mainActivity);
@@ -82,9 +82,18 @@ public class CreateContact extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == CAMERA_REQUEST && resultCode == RESULT_OK){
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            mImage.setImageBitmap(photo);
+        if(requestCode == CAMERA_REQUEST){
+
+            switch (resultCode){
+                case RESULT_OK:
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    mImage.setImageBitmap(photo);
+                    mTextView.setVisibility(View.GONE);
+                    break;
+                case RESULT_CANCELED:
+                    mTextView.setVisibility(View.VISIBLE);
+                    break;
+            }
         }
     }
 

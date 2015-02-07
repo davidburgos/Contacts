@@ -52,9 +52,9 @@ public class ContactListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_contact_list, container, false);
-
-        return rootView;
+//        View rootView = inflater.inflate(R.layout.fragment_contact_list, container, false);
+//        return rootView;
+        return inflater.inflate(R.layout.fragment_contact_list, container, false);
     }
 
     private void createNewTask(String pFirstName, String pLastName, String pNickName, byte[] pImage) {
