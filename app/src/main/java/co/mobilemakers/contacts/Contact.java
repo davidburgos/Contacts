@@ -1,16 +1,34 @@
 package co.mobilemakers.contacts;
 
-/**
- * Created by David on 06/02/2015 for project ${PROJECT_NAME}.
- */
 public class Contact {
 
-    private String mName;
+    private String mFirstName;
+    private String mLastName;
     private String mNickname;
     byte[] mImage;
 
-    public String getmName() {
-        return mName;
+    public void setmFirstName(String mFirstName) {
+        this.mFirstName = mFirstName;
+    }
+
+    public void setmLastName(String mLastName) {
+        this.mLastName = mLastName;
+    }
+
+    public void setmNickname(String mNickname) {
+        this.mNickname = mNickname;
+    }
+
+    public void setmImage(byte[] mImage) {
+        this.mImage = mImage;
+    }
+
+    public String getmFirstName() {
+        return mFirstName;
+    }
+
+    public String getmLastName() {
+        return mLastName;
     }
 
     public String getmNickname() {

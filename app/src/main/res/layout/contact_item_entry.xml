@@ -35,20 +35,44 @@
             android:padding="5dp"
             android:gravity="center_vertical">
 
-            <TextView android:id="@+id/text_view_title_name"
+            <TextView android:id="@+id/text_view_title_firstname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItem"
-                android:gravity="left"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_weight="1"
                 android:textStyle="bold"
-                android:text="@string/text_view_title_contact_name" />
+                android:text="@string/text_view_title_contact_firstname"
+                android:gravity="right" />
 
-            <TextView android:id="@+id/text_view_name"
+            <TextView android:id="@+id/text_view_firstname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItemSmall"
-                android:layout_weight="3"/>
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_weight="2"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:gravity="center_vertical">
+
+            <TextView android:id="@+id/text_view_title_lastname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:text="@string/text_view_title_contact_lastname"
+                android:gravity="right" />
+
+            <TextView android:id="@+id/text_view_lastname"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_weight="2"/>
 
         </LinearLayout>
 
@@ -62,16 +86,16 @@
             <TextView android:id="@+id/text_view_title_nickname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItem"
-                android:gravity="left"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_weight="1"
                 android:text="@string/text_view_title_contact_nickname"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:gravity="right" />
 
             <TextView android:id="@+id/text_view_nickname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceListItemSmall"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:layout_weight="2" />
         </LinearLayout>
     </LinearLayout>
