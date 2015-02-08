@@ -1,11 +1,26 @@
 package co.mobilemakers.contacts;
 
+import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable
 public class Contact {
 
-    private String mFirstName;
-    private String mLastName;
-    private String mNickname;
-    byte[] mImage;
+    public final static String ID        = "_id";
+    public final static String FIRSTNAME = "FirstName";
+    public final static String LASTNAME  = "LastName";
+    public final static String NICKNAME  = "Nickname";
+    public final static String IMAGE     = "Image";
+
+    @DatabaseField(generatedId = true,
+                    columnName = ID)      private int _id;
+    @DatabaseField(columnName = FIRSTNAME)private String mFirstName;
+    @DatabaseField(columnName = LASTNAME) private String mLastName;
+    @DatabaseField(columnName = NICKNAME) private String mNickname;
+    @DatabaseField(columnName = IMAGE,
+                     dataType = DataType.BYTE_ARRAY)private byte[] mImage;
+
 
     public void setmFirstName(String mFirstName) {
         this.mFirstName = mFirstName;

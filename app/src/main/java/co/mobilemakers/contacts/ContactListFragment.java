@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,18 +13,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
+import java.sql.SQLException;
 import java.util.List;
 
 
-public class ContactListFragment extends ListFragment {
+public class ContactListFragment extends ListFragment{
 
     protected final static int REQUEST_CODE = 314;
+    protected final static String LOG_TAG = ContactListFragment.class.getSimpleName();
+    private DatabaseHelper mDBHelper;
     List<Contact> mEntries;
     ContactAdapter mAdapter;
 
     public ContactListFragment() {
+    }
+
+    private DatabaseHelper getDBHelper(){
+        if(mDBHelper == null){
+           mDBHelper = OpenHelperManager.getHelper(getActivity(),DatabaseHelper.class);
+        }
+        return mDBHelper;
     }
 
     @Override
@@ -33,7 +44,8 @@ public class ContactListFragment extends ListFragment {
     }
 
     private void prepareListView() {
-        mEntries = new ArrayList<>();
+        //mEntries = new ArrayList<>();
+        mEntries = getDBHelper().retrieveAllContacts();
         mAdapter = new ContactAdapter(getActivity(), mEntries);
         setListAdapter(mAdapter);
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -54,17 +66,37 @@ public class ContactListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 //        View rootView = inflater.inflate(R.layout.fragment_contact_list, container, false);
 //        return rootView;
+
         return inflater.inflate(R.layout.fragment_contact_list, container, false);
     }
 
-    private void createNewTask(String pFirstName, String pLastName, String pNickName, byte[] pImage) {
+    private void createNewContact(String pFirstName, String pLastName, String pNickName, byte[] pImage) {
         Contact contact = new Contact();
         contact.setmFirstName(pFirstName);
         contact.setmLastName(pLastName);
         contact.setmNickname(pNickName);
         contact.setmImage(pImage);
         mEntries.add(contact);
+        saveContactInDatabase(contact);
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroy() {
+        if(mDBHelper != null){
+            OpenHelperManager.releaseHelper();
+            mDBHelper = null;
+        }
+        super.onDestroy();
+    }
+
+    private void saveContactInDatabase(Contact contact){
+        try{
+            Dao<Contact, Integer> dao = getDBHelper().getContactDao();
+            dao.create(contact);
+        }catch (SQLException e){
+            Log.e(LOG_TAG, "Can´t insert Contact into database "+DatabaseHelper.DATABASE_NAME, e);
+        }
     }
 
     @Override
@@ -72,10 +104,10 @@ public class ContactListFragment extends ListFragment {
         super.onActivityResult(requestCode, resultCode, data);
         switch (resultCode){
             case Activity.RESULT_OK:
-                createNewTask(data.getStringExtra(CreateContact.FIRSTNAME),
-                              data.getStringExtra(CreateContact.LASTNAME) ,
-                              data.getStringExtra(CreateContact.NICKNAME) ,
-                              data.getByteArrayExtra(CreateContact.IMAGE));
+                createNewContact(data.getStringExtra(CreateContact.FIRSTNAME),
+                                 data.getStringExtra(CreateContact.LASTNAME),
+                                 data.getStringExtra(CreateContact.NICKNAME),
+                                 data.getByteArrayExtra(CreateContact.IMAGE));
                 break;
             case Activity.RESULT_CANCELED:
                 Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
