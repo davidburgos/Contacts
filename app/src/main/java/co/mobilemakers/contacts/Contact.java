@@ -22,6 +22,10 @@ public class Contact {
                      dataType = DataType.BYTE_ARRAY)private byte[] mImage;
 
 
+    public int get_id() {
+        return _id;
+    }
+
     public void setmFirstName(String mFirstName) {
         this.mFirstName = mFirstName;
     }

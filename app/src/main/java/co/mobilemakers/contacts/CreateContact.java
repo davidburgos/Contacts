@@ -20,10 +20,11 @@ import java.io.ByteArrayOutputStream;
 
 public class CreateContact extends ActionBarActivity {
 
-    public final static String FIRSTNAME = "FIRSTNAME";
-    public final static String LASTNAME  = "LASTNAME";
-    public final static String NICKNAME  = "NICKNAME";
-    public final static String IMAGE  = "IMAGE";
+//    public final static String mID = "mID";
+//    public final static String FIRSTNAME = "FIRSTNAME";
+//    public final static String LASTNAME  = "LASTNAME";
+//    public final static String NICKNAME  = "NICKNAME";
+//    public final static String IMAGE  = "IMAGE";
     public final static int CAMERA_REQUEST  = 31415;
 
     private EditText mFirstName;
@@ -60,16 +61,16 @@ public class CreateContact extends ActionBarActivity {
             public void onClick(View v) {
                 Intent mainActivity = new Intent();
 
-                mainActivity.putExtra(FIRSTNAME,mFirstName.getText().toString());
-                mainActivity.putExtra(LASTNAME ,mLastName.getText().toString());
-                mainActivity.putExtra(NICKNAME ,mNickName.getText().toString());
+                mainActivity.putExtra(Contact.FIRSTNAME,mFirstName.getText().toString());
+                mainActivity.putExtra(Contact.LASTNAME ,mLastName.getText().toString());
+                mainActivity.putExtra(Contact.NICKNAME ,mNickName.getText().toString());
 
                  if(mImage.getDrawable() != null){
                     mImage.buildDrawingCache();
                     Bitmap bm=((BitmapDrawable)mImage.getDrawable()).getBitmap();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bm.compress(Bitmap.CompressFormat.PNG, 90, stream);
-                    mainActivity.putExtra(IMAGE ,stream.toByteArray());
+                    mainActivity.putExtra(Contact.IMAGE ,stream.toByteArray());
                 }
 
                 setResult(Activity.RESULT_OK, mainActivity);

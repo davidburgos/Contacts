@@ -2,6 +2,8 @@ package co.mobilemakers.contacts;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -12,16 +14,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
+
+import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.util.List;
 
 
 public class ContactListFragment extends ListFragment{
 
-    protected final static int REQUEST_CODE = 314;
+    protected final static int CREATE_REQUEST_CODE = 3141;
+    protected final static int DELETE_REQUEST_CODE = 1980;
+    protected final static int UPDATE_REQUEST_CODE = 2717;
+
     protected final static String LOG_TAG = ContactListFragment.class.getSimpleName();
     private DatabaseHelper mDBHelper;
     List<Contact> mEntries;
@@ -44,14 +54,36 @@ public class ContactListFragment extends ListFragment{
     }
 
     private void prepareListView() {
-        //mEntries = new ArrayList<>();
         mEntries = getDBHelper().retrieveAllContacts();
         mAdapter = new ContactAdapter(getActivity(), mEntries);
         setListAdapter(mAdapter);
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(),"Edit task in next version!",Toast.LENGTH_LONG).show();
+                Intent editContact = new Intent(getActivity(), EditContactActivity.class);
+/*
+                  TextView  FirstName = (TextView) view.findViewById(R.id.edit_text_firstname_edit);
+                  TextView  LastName  = (EditText) view.findViewById(R.id.edit_text_lastname_edit);
+                  TextView  NickName  = (EditText) view.findViewById(R.id.edit_text_nickname_edit);
+                  ImageView Image     = (ImageView)view.findViewById(R.id.image_edit);
+*/
+                Contact contact = getContactById(view.getId());
+                if(contact != null){
+                    editContact.putExtra(Contact.ID,view.getId());
+                    editContact.putExtra(Contact.FIRSTNAME,contact.getmFirstName());
+                    editContact.putExtra(Contact.LASTNAME, contact.getmLastName());
+                    editContact.putExtra(Contact.NICKNAME, contact.getmNickname());
+                    editContact.putExtra(Contact.IMAGE ,   contact.getmImage());
+
+                    /*if(Image.getmImage().getDrawable() != null){
+                        Image.buildDrawingCache();
+                        Bitmap bm=((BitmapDrawable)Image.getDrawable()).getBitmap();
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bm.compress(Bitmap.CompressFormat.PNG, 90, stream);
+                    }    */
+                }
+
+                startActivityForResult(editContact, UPDATE_REQUEST_CODE);
             }
         });
     }
@@ -81,6 +113,38 @@ public class ContactListFragment extends ListFragment{
         mAdapter.notifyDataSetChanged();
     }
 
+    private void updateContact(int Id, String pFirstName, String pLastName, String pNickName, byte[] pImage) {
+
+        try{
+            Contact contact;
+            Dao<Contact, Integer> dao = getDBHelper().getContactDao();
+            contact = dao.queryForId(Id);
+            if(contact != null){
+                contact.setmFirstName(pFirstName);
+                contact.setmLastName(pLastName);
+                contact.setmNickname(pNickName);
+                contact.setmImage(pImage);
+                dao.update(contact);
+                mAdapter.notifyDataSetChanged();
+            }
+        }catch (SQLException e){
+            Log.e(LOG_TAG, "Can´t update Contact into database "+DatabaseHelper.DATABASE_NAME, e);
+        }
+    }
+
+    private Contact getContactById(int Id){
+        Contact contact = null;
+        Dao<Contact, Integer> dao = null;
+        try {
+            dao = getDBHelper().getContactDao();
+            contact = dao.queryForId(Id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return contact;
+    }
+
     @Override
     public void onDestroy() {
         if(mDBHelper != null){
@@ -102,15 +166,47 @@ public class ContactListFragment extends ListFragment{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (resultCode){
-            case Activity.RESULT_OK:
-                createNewContact(data.getStringExtra(CreateContact.FIRSTNAME),
-                                 data.getStringExtra(CreateContact.LASTNAME),
-                                 data.getStringExtra(CreateContact.NICKNAME),
-                                 data.getByteArrayExtra(CreateContact.IMAGE));
+
+        switch (requestCode){
+            case UPDATE_REQUEST_CODE:
+                switch (resultCode){
+                    case Activity.RESULT_OK:
+                        updateContact(data.getIntExtra(Contact.ID,-1),
+                                      data.getStringExtra(Contact.FIRSTNAME),
+                                      data.getStringExtra(Contact.LASTNAME),
+                                      data.getStringExtra(Contact.NICKNAME),
+                                      data.getByteArrayExtra(Contact.IMAGE));
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
+                        break;
+                    case DELETE_REQUEST_CODE:
+                        switch (resultCode){
+                            case Activity.RESULT_OK:
+                                createNewContact(data.getStringExtra(Contact.FIRSTNAME),
+                                        data.getStringExtra(Contact.LASTNAME),
+                                        data.getStringExtra(Contact.NICKNAME),
+                                        data.getByteArrayExtra(Contact.IMAGE));
+                                break;
+                            case Activity.RESULT_CANCELED:
+                                Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
+                                break;
+                        }
+                        break;
+                }
                 break;
-            case Activity.RESULT_CANCELED:
-                Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
+            case CREATE_REQUEST_CODE:
+                switch (resultCode){
+                    case Activity.RESULT_OK:
+                        createNewContact(data.getStringExtra(Contact.FIRSTNAME),
+                                data.getStringExtra(Contact.LASTNAME),
+                                data.getStringExtra(Contact.NICKNAME),
+                                data.getByteArrayExtra(Contact.IMAGE));
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
+                        break;
+                }
                 break;
         }
     }
@@ -129,7 +225,7 @@ public class ContactListFragment extends ListFragment{
         switch (item.getItemId()){
             case R.id.action_add_contact:
                 Intent intent = new Intent(getActivity(), CreateContact.class);
-                startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(intent, CREATE_REQUEST_CODE);
                 handled = true;
                 break;
         }

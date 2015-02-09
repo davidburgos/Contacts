@@ -62,6 +62,8 @@ public class ContactAdapter extends BaseAdapter{
     private void displayContentInView(final int position, View rowView) {
         if (rowView != null) {
 
+            rowView.setId(mContacts.get(position).get_id());
+
             TextView textViewFirstName = (TextView)rowView.findViewById(R.id.text_view_firstname);
             textViewFirstName.setText(mContacts.get(position).getmFirstName());
 
