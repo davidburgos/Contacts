@@ -27,8 +27,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/edit_text_firstname"
-            android:text="@string/text_view_title_contact_firstname" />
+            android:id="@+id/edit_text_firstname" />
     </LinearLayout>
 
     <LinearLayout
@@ -47,8 +46,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/edit_text_lastname"
-            android:text="@string/text_view_title_contact_lastname" />
+            android:id="@+id/edit_text_lastname" />
     </LinearLayout>
 
     <LinearLayout
@@ -67,8 +65,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/edit_text_nickname"
-            android:text="@string/text_view_title_contact_nickname" />
+            android:id="@+id/edit_text_nickname" />
     </LinearLayout>
 
     <RelativeLayout

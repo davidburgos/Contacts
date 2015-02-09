@@ -2,8 +2,6 @@ package co.mobilemakers.contacts;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -14,14 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 
-import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -61,12 +55,7 @@ public class ContactListFragment extends ListFragment{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent editContact = new Intent(getActivity(), EditContactActivity.class);
-/*
-                  TextView  FirstName = (TextView) view.findViewById(R.id.edit_text_firstname_edit);
-                  TextView  LastName  = (EditText) view.findViewById(R.id.edit_text_lastname_edit);
-                  TextView  NickName  = (EditText) view.findViewById(R.id.edit_text_nickname_edit);
-                  ImageView Image     = (ImageView)view.findViewById(R.id.image_edit);
-*/
+
                 Contact contact = getContactById(view.getId());
                 if(contact != null){
                     editContact.putExtra(Contact.ID,view.getId());
@@ -74,13 +63,6 @@ public class ContactListFragment extends ListFragment{
                     editContact.putExtra(Contact.LASTNAME, contact.getmLastName());
                     editContact.putExtra(Contact.NICKNAME, contact.getmNickname());
                     editContact.putExtra(Contact.IMAGE ,   contact.getmImage());
-
-                    /*if(Image.getmImage().getDrawable() != null){
-                        Image.buildDrawingCache();
-                        Bitmap bm=((BitmapDrawable)Image.getDrawable()).getBitmap();
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bm.compress(Bitmap.CompressFormat.PNG, 90, stream);
-                    }    */
                 }
 
                 startActivityForResult(editContact, UPDATE_REQUEST_CODE);
@@ -102,15 +84,20 @@ public class ContactListFragment extends ListFragment{
         return inflater.inflate(R.layout.fragment_contact_list, container, false);
     }
 
-    private void createNewContact(String pFirstName, String pLastName, String pNickName, byte[] pImage) {
+    private void createContact(String pFirstName, String pLastName, String pNickName, byte[] pImage) {
         Contact contact = new Contact();
         contact.setmFirstName(pFirstName);
         contact.setmLastName(pLastName);
         contact.setmNickname(pNickName);
         contact.setmImage(pImage);
         mEntries.add(contact);
-        saveContactInDatabase(contact);
-        mAdapter.notifyDataSetChanged();
+
+        try{
+            Dao<Contact, Integer> dao = getDBHelper().getContactDao();
+            dao.create(contact);
+        }catch (SQLException e){
+            Log.e(LOG_TAG, "Can´t insert Contact into database "+DatabaseHelper.DATABASE_NAME, e);
+        }
     }
 
     private void updateContact(int Id, String pFirstName, String pLastName, String pNickName, byte[] pImage) {
@@ -125,11 +112,29 @@ public class ContactListFragment extends ListFragment{
                 contact.setmNickname(pNickName);
                 contact.setmImage(pImage);
                 dao.update(contact);
-                mAdapter.notifyDataSetChanged();
             }
         }catch (SQLException e){
             Log.e(LOG_TAG, "Can´t update Contact into database "+DatabaseHelper.DATABASE_NAME, e);
         }
+    }
+
+    private void deleteContact(Contact contact) {
+
+        try{
+            if(contact != null){
+                Dao<Contact, Integer> dao = getDBHelper().getContactDao();
+                dao.delete(contact);
+            }
+        }catch (SQLException e){
+            Log.e(LOG_TAG, "Can´t delete Contact into database "+DatabaseHelper.DATABASE_NAME, e);
+        }
+    }
+
+    private void refreshListView(){
+        mEntries.clear();
+        mEntries = getDBHelper().retrieveAllContacts();
+        mAdapter.mContacts = mEntries;
+        mAdapter.notifyDataSetChanged();
     }
 
     private Contact getContactById(int Id){
@@ -154,15 +159,6 @@ public class ContactListFragment extends ListFragment{
         super.onDestroy();
     }
 
-    private void saveContactInDatabase(Contact contact){
-        try{
-            Dao<Contact, Integer> dao = getDBHelper().getContactDao();
-            dao.create(contact);
-        }catch (SQLException e){
-            Log.e(LOG_TAG, "Can´t insert Contact into database "+DatabaseHelper.DATABASE_NAME, e);
-        }
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -181,24 +177,14 @@ public class ContactListFragment extends ListFragment{
                         Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
                         break;
                     case DELETE_REQUEST_CODE:
-                        switch (resultCode){
-                            case Activity.RESULT_OK:
-                                createNewContact(data.getStringExtra(Contact.FIRSTNAME),
-                                        data.getStringExtra(Contact.LASTNAME),
-                                        data.getStringExtra(Contact.NICKNAME),
-                                        data.getByteArrayExtra(Contact.IMAGE));
-                                break;
-                            case Activity.RESULT_CANCELED:
-                                Toast.makeText(getActivity(), R.string.canceled_message, Toast.LENGTH_LONG).show();
-                                break;
-                        }
+                        deleteContact(getContactById(data.getIntExtra(Contact.ID,-1)));
                         break;
                 }
                 break;
             case CREATE_REQUEST_CODE:
                 switch (resultCode){
                     case Activity.RESULT_OK:
-                        createNewContact(data.getStringExtra(Contact.FIRSTNAME),
+                        createContact(data.getStringExtra(Contact.FIRSTNAME),
                                 data.getStringExtra(Contact.LASTNAME),
                                 data.getStringExtra(Contact.NICKNAME),
                                 data.getByteArrayExtra(Contact.IMAGE));
@@ -209,6 +195,7 @@ public class ContactListFragment extends ListFragment{
                 }
                 break;
         }
+        refreshListView();
     }
 
     @Override

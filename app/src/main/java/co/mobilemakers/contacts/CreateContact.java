@@ -20,11 +20,6 @@ import java.io.ByteArrayOutputStream;
 
 public class CreateContact extends ActionBarActivity {
 
-//    public final static String mID = "mID";
-//    public final static String FIRSTNAME = "FIRSTNAME";
-//    public final static String LASTNAME  = "LASTNAME";
-//    public final static String NICKNAME  = "NICKNAME";
-//    public final static String IMAGE  = "IMAGE";
     public final static int CAMERA_REQUEST  = 31415;
 
     private EditText mFirstName;
@@ -92,7 +87,11 @@ public class CreateContact extends ActionBarActivity {
                     mTextView.setVisibility(View.GONE);
                     break;
                 case RESULT_CANCELED:
-                    mTextView.setVisibility(View.VISIBLE);
+                    if(mImage.getDrawable() != null){
+                        mTextView.setVisibility(View.GONE);
+                    }else{
+                        mTextView.setVisibility(View.VISIBLE);
+                    }
                     break;
             }
         }

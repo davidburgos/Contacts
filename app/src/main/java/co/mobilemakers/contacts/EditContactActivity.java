@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 
@@ -20,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 public class EditContactActivity extends ActionBarActivity {
 
     EditText mFirstName, mLastName, mNickName;
+    TextView mTextImagen;
     ImageView mImage;
     Button mButtonDelete, mButtonUpdate;
     int mID;
@@ -39,7 +42,7 @@ public class EditContactActivity extends ActionBarActivity {
             public void onClick(View v) {
                 Intent mainActivity = new Intent();
 
-                mainActivity.putExtra(Contact.ID       ,mID);
+                mainActivity.putExtra(Contact.ID, mID);
                 mainActivity.putExtra(Contact.FIRSTNAME,mFirstName.getText().toString());
                 mainActivity.putExtra(Contact.LASTNAME ,mLastName.getText().toString());
                 mainActivity.putExtra(Contact.NICKNAME ,mNickName.getText().toString());
@@ -61,11 +64,46 @@ public class EditContactActivity extends ActionBarActivity {
         mButtonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent mainActivity = new Intent();
 
-                setResult(ContactListFragment.DELETE_REQUEST_CODE);
+                mainActivity.putExtra(Contact.ID, mID);
+
+                setResult(ContactListFragment.DELETE_REQUEST_CODE, mainActivity);
                 finish();
             }
         });
+
+        mImage.setDrawingCacheEnabled(true);
+        mImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent CameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(CameraIntent, CreateContact.CAMERA_REQUEST);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == CreateContact.CAMERA_REQUEST){
+
+            switch (resultCode){
+                case RESULT_OK:
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    mImage.setImageBitmap(photo);
+                    mTextImagen.setVisibility(View.GONE);
+                    break;
+                case RESULT_CANCELED:
+                    if(mImage.getDrawable() != null){
+                        mTextImagen.setVisibility(View.GONE);
+                    }else{
+                        mTextImagen.setVisibility(View.VISIBLE);
+                    }
+                    break;
+            }
+        }
     }
 
     private void populateData() {
@@ -79,6 +117,10 @@ public class EditContactActivity extends ActionBarActivity {
         if(byteArray != null){
             Bitmap bm = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
             mImage.setImageBitmap(bm);
+            mTextImagen.setVisibility(View.GONE);
+        }else
+        {
+            mTextImagen.setVisibility(View.VISIBLE);
         }
     }
 
@@ -86,6 +128,7 @@ public class EditContactActivity extends ActionBarActivity {
         mFirstName = (EditText) findViewById(R.id.edit_text_firstname_edit);
         mLastName = (EditText) findViewById(R.id.edit_text_lastname_edit);
         mNickName = (EditText) findViewById(R.id.edit_text_nickname_edit);
+        mTextImagen = (TextView)findViewById(R.id.textViewImageMessage_edit);
         mImage    = (ImageView) findViewById(R.id.image_edit);
         mButtonDelete = (Button)findViewById(R.id.button_delete);
         mButtonUpdate = (Button)findViewById(R.id.button_update);

@@ -10,10 +10,10 @@
     <string name="text_view_title_contact_nickname">Nickname:</string>
     <string name="text_image_hint">Tap to make a picture.</string>
     <string name="canceled_message">Task cancelled</string>
-    <string name="title_activity_create_contact">CreateContact</string>
+    <string name="title_activity_create_contact">Create Contact</string>
     <string name="hello_world">Hello world!</string>
     <string name="text_button_done">Done</string>
-    <string name="title_activity_edit_contact">EditContactActivity</string>
+    <string name="title_activity_edit_contact">Edit Contact</string>
     <string name="text_button_update">Update</string>
     <string name="text_button_delete">Delete Contact</string>
 
